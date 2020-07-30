@@ -1,4 +1,5 @@
-console.log('[DevSoutinho] Flappy Bird');
+const somDe_HIT = new Audio();
+somDe_HIT.src = './efeitos/hit.wav';
 
 const sprites = new Image();
 sprites.src = './sprites.png';
@@ -83,6 +84,18 @@ const mensagemGetReady = {
   },
 };
 
+function fazColisao(flappyBird, chao){
+  const flappyBirdY = flappyBird.y + flappyBird.altura;
+  const chaoY = chao.y;
+  
+  if (flappyBirdY >= chaoY){
+    return true;
+  }
+
+  return false;
+};
+
+// function criaFlappyBird() {
 const flappyBird = {
   spriteX: 0,
   spriteY: 0,
@@ -92,11 +105,30 @@ const flappyBird = {
   y: 50,
   gravidade: 0.25,
   velocidade: 0,
+  pulo: 4.6,
+
+  inicializa() {
+    flappyBird.x = 10;
+    flappyBird.y = 50;
+    flappyBird.velocidade = 0;
+  },
+
+  pula() {
+    flappyBird.velocidade = -flappyBird.pulo;
+  },
 
   atualiza() {
+    if(fazColisao(flappyBird, chao)){
+      somDe_HIT.play();
+      setTimeout(() => {
+        mudaParaTela(Telas.INICIO);
+      }, 1000);
+      return;
+    }
+    console.log(flappyBird.velocidade);
     flappyBird.velocidade += flappyBird.gravidade;
     flappyBird.y += flappyBird.velocidade;
-  },
+  },  
 
   desenha() {
     contexto.drawImage(
@@ -107,23 +139,36 @@ const flappyBird = {
       flappyBird.largura, flappyBird.altura,
     );
   }
-}
+};
 
+// const globais = {};
 let telaAtiva = {};
 
 function mudaParaTela(novaTela){
   telaAtiva = novaTela;
+
+  // if(telaAtiva.inicializa){
+  //   telaAtiva.inicializa();
+  // }
 }
 
 const Telas = {
   INICIO: {
+    // inicializa() {
+    //   globais.flappyBird = criaFlappyBird();  
+    // },
+
     desenha() {
       planoDeFundo.desenha();
       chao.desenha();
       mensagemGetReady.desenha();
+      // globais.flappyBird.desenha();
+      flappyBird.inicializa();
       flappyBird.desenha();
     },
+    
     atualiza() {},
+    
     click() {
       mudaParaTela(Telas.JOGO);
     },
@@ -132,10 +177,18 @@ const Telas = {
     desenha() {
       planoDeFundo.desenha();
       chao.desenha();
+      // globais.flappyBird.desenha();
       flappyBird.desenha();
     },
+
     atualiza() {
+      // globais.flappyBird.atualiza();
       flappyBird.atualiza();
+    },
+
+    click() {
+      // globais.flappyBird.pula();
+      flappyBird.pula();
     },
   }
 };
@@ -154,4 +207,5 @@ window.addEventListener('click', function() {
 });
 
 mudaParaTela(Telas.INICIO);
+
 loop();
