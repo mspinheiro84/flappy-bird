@@ -3,6 +3,7 @@ somDe_HIT.src = './efeitos/hit.wav';
 
 const sprites = new Image();
 sprites.src = './sprites.png';
+
 let frames = 0;
 
 const canvas = document.querySelector('canvas');
@@ -16,6 +17,7 @@ const planoDeFundo = {
   altura: 204,
   x: 0,
   y: canvas.height - 204,
+
   desenha() {
     contexto.fillStyle = '#70c5ce';
     contexto.fillRect(0, 0, canvas.width, canvas.height)
@@ -79,6 +81,26 @@ const chao = {
   },
 };
 
+// [Tela de Game Over]
+const mensagemGameOver = {
+  spriteX: 132,
+  spriteY: 153,
+  largura: 228,
+  altura: 200,
+  x: (canvas.width / 2) - (228 / 2),
+  y: 54,
+
+  desenha() {
+    contexto.drawImage(
+      sprites,
+      mensagemGameOver.spriteX, mensagemGameOver.spriteY,
+      mensagemGameOver.largura, mensagemGameOver.altura,
+      mensagemGameOver.x, mensagemGameOver.y,
+      mensagemGameOver.largura, mensagemGameOver.altura,
+    );
+  },
+};
+
 // [Tela de inicio]
 const mensagemGetReady = {
   spriteX: 134,
@@ -110,6 +132,7 @@ function fazColisao(flappyBird, chao) {
   return false;
 };
 
+// [Canos]
 const canos = {
   largura: 52,
   altura: 400,
@@ -133,8 +156,6 @@ const canos = {
   },
 
   desenha() {
-    // const yRandom = Math.random()*chao.y;
-
     canos.pares.forEach(function(par) {
       const yRandom = par.y;
       const alturaMaximaDoCano = 135;
@@ -176,8 +197,9 @@ const canos = {
   temColisao(par){
     const cabecaDoFlappy = flappyBird.y;
     const peDoFlappy = flappyBird.y + flappyBird.altura;
+    const barrigaFlappy = flappyBird.x + flappyBird.largura;
 
-    if(flappyBird.x >= par.x){
+    if(barrigaFlappy >= par.x){
       if (cabecaDoFlappy <= par.canoCeu.y){
         return true;
       }
@@ -186,23 +208,26 @@ const canos = {
         return true;
       }
     }
+    return false;
   },
 
   atualiza(){
     const distanciaFrames = 100;
-    if (!(frames%distanciaFrames)){
+    if ((frames%distanciaFrames === 0)){
       canos.pares.push({
         x: canvas.width,
         y: Math.random()*(chao.y-100),
       });
     }
+
     canos.pares.forEach(function(par) {
       par.x -= canos.velocidadeCanos;
 
       if(canos.temColisao(par)){
-        setTimeout(() => {
-          mudaParaTela(Telas.INICIO);
-        }, 500);
+        console.log("Perdeu2");
+        console.log(flappyBird.x+flappyBird.largura);
+        console.log(par.x);
+        mudaParaTela(Telas.GAMEOVER);        
       }
       if(par.x <= -canos.largura){
         canos.pares.shift();
@@ -252,7 +277,7 @@ const flappyBird = {
     if (fazColisao(flappyBird, chao)) {
       somDe_HIT.play();
       setTimeout(() => {
-        mudaParaTela(Telas.INICIO);
+        mudaParaTela(Telas.GAMEOVER);
       }, 500);
       return;
     }
@@ -291,7 +316,6 @@ function mudaParaTela(novaTela) {
 
 const Telas = {
   INICIO: {
-
     desenha() {
       frames = 0;
       flappyBird.inicializa();
@@ -309,6 +333,18 @@ const Telas = {
 
     click() {
       mudaParaTela(Telas.JOGO);
+    },
+  },
+  GAMEOVER: {
+    desenha() {
+      mensagemGameOver.desenha();
+      flappyBird.desenha();
+    },
+
+    atualiza() { },
+
+    click() {
+      mudaParaTela(Telas.INICIO);
     },
   },
   JOGO: {
