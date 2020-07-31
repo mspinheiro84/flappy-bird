@@ -5,6 +5,7 @@ somBatida.src = './efeitos/hit.wav';
 somCaiu.src = './efeitos/caiu.wav';
 somPulo.src = './efeitos/pulo.wav';
 
+// let pontuacao = 0;
 
 const sprites = new Image();
 sprites.src = './sprites.png';
@@ -13,6 +14,31 @@ let frames = 0;
 
 const canvas = document.querySelector('canvas');
 const contexto = canvas.getContext('2d');
+
+// [Pontuação]
+const pontuacao = {
+  pontos:0,
+  desenha(){
+    // contexto.fillStyle = '#fff';
+    // contexto.fillRect(250, 10, 60, 15)
+
+    contexto.textAlign = "center";
+    contexto.strokeText("Pontuação", 280, 15);
+    contexto.strokeText(this.pontos, 280, 27);
+
+  },
+  atualiza(){
+    this.pontos += 1;
+  },
+  inicializa() {
+    this.pontos = 0;
+  },
+
+  gameOver(){
+    contexto.textAlign = "center";
+    contexto.strokeText(this.pontos, 230, 142);
+  }
+}
 
 // [Plano de Fundo]
 const planoDeFundo = {
@@ -321,6 +347,7 @@ const Telas = {
   INICIO: {
     desenha() {
       frames = 0;
+      pontuacao.inicializa();
       flappyBird.inicializa();
       canos.inicializa();
       chao.inicializa();
@@ -338,10 +365,12 @@ const Telas = {
       mudaParaTela(Telas.JOGO);
     },
   },
+
   GAMEOVER: {
     cliques: 0,
     desenha() {
       mensagemGameOver.desenha();
+      pontuacao.gameOver();
       flappyBird.desenha();
     },
 
@@ -365,6 +394,7 @@ const Telas = {
       chao.desenha();
       // globais.flappyBird.desenha();
       flappyBird.desenha();
+      pontuacao.desenha();
     },
 
     atualiza() {
@@ -372,6 +402,8 @@ const Telas = {
       flappyBird.atualiza();
       canos.atualiza();
       chao.atualiza();
+      pontuacao.atualiza();
+      console.log(pontuacao.pontos);
     },
 
     click() {
