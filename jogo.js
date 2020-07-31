@@ -1,5 +1,10 @@
-const somDe_HIT = new Audio();
-somDe_HIT.src = './efeitos/hit.wav';
+const somBatida = new Audio();
+const somCaiu = new Audio();
+const somPulo = new Audio();
+somBatida.src = './efeitos/hit.wav';
+somCaiu.src = './efeitos/caiu.wav';
+somPulo.src = './efeitos/pulo.wav';
+
 
 const sprites = new Image();
 sprites.src = './sprites.png';
@@ -52,6 +57,17 @@ const chao = {
   inicializa() {
     chao.x = 0;
     chao.y = canvas.height - 112;
+  },
+
+  fazColisaoChao(flappyBird) {
+    const flappyBirdY = flappyBird.y + flappyBird.altura;
+    const chaoY = chao.y;
+  
+    if (flappyBirdY >= chaoY) {
+      return true;
+    }
+  
+    return false;
   },
 
   atualiza() {
@@ -121,17 +137,6 @@ const mensagemGetReady = {
   },
 };
 
-function fazColisao(flappyBird, chao) {
-  const flappyBirdY = flappyBird.y + flappyBird.altura;
-  const chaoY = chao.y;
-
-  if (flappyBirdY >= chaoY) {
-    return true;
-  }
-
-  return false;
-};
-
 // [Canos]
 const canos = {
   largura: 52,
@@ -144,7 +149,7 @@ const canos = {
     spriteX: 52,
     spriteY: 169,
   },
-  espaco: 80,
+  espaco: 100,
   pares: [],
   velocidadeCanos: 2,
 
@@ -194,12 +199,12 @@ const canos = {
     });
   },
 
-  temColisao(par){
+  fazColisaoCano(par){
     const cabecaDoFlappy = flappyBird.y;
     const peDoFlappy = flappyBird.y + flappyBird.altura;
     const barrigaFlappy = flappyBird.x + flappyBird.largura;
 
-    if(barrigaFlappy >= par.x){
+    if(barrigaFlappy >= par.x+5){
       if (cabecaDoFlappy <= par.canoCeu.y){
         return true;
       }
@@ -223,10 +228,8 @@ const canos = {
     canos.pares.forEach(function(par) {
       par.x -= canos.velocidadeCanos;
 
-      if(canos.temColisao(par)){
-        console.log("Perdeu2");
-        console.log(flappyBird.x+flappyBird.largura);
-        console.log(par.x);
+      if(canos.fazColisaoCano(par)){
+        somBatida.play();
         mudaParaTela(Telas.GAMEOVER);        
       }
       if(par.x <= -canos.largura){
@@ -244,9 +247,9 @@ const flappyBird = {
   altura: 24,
   x: 10,
   y: 50,
-  gravidade: 0.25,
+  gravidade: 0.1,
   velocidade: 0,
-  pulo: 4.6,
+  pulo: 2,
   frameAtual: 0,
   movimentos: [
     { spriteX: 0, spriteY: 0, },
@@ -274,8 +277,8 @@ const flappyBird = {
   },
 
   atualiza() {
-    if (fazColisao(flappyBird, chao)) {
-      somDe_HIT.play();
+    if (chao.fazColisaoChao(flappyBird)) {
+      somCaiu.play();
       setTimeout(() => {
         mudaParaTela(Telas.GAMEOVER);
       }, 500);
@@ -336,15 +339,23 @@ const Telas = {
     },
   },
   GAMEOVER: {
+    cliques: 0,
     desenha() {
       mensagemGameOver.desenha();
       flappyBird.desenha();
     },
 
-    atualiza() { },
+    saiGameOver() {
+      Telas.GAMEOVER.cliques = 0;
+      mudaParaTela(Telas.INICIO);
+    },
+
+    atualiza() {  },
 
     click() {
-      mudaParaTela(Telas.INICIO);
+      if(++Telas.GAMEOVER.cliques >= 3 ){
+        Telas.GAMEOVER.saiGameOver();
+      }
     },
   },
   JOGO: {
