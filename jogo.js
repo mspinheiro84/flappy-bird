@@ -34,9 +34,17 @@ const pontuacao = {
     this.pontos = 0;
   },
 
-  gameOver(){
+  gameOver(){    
     contexto.textAlign = "center";
-    contexto.strokeText(this.pontos, 230, 142);
+    contexto.strokeText(this.pontos, 230, 142);    
+    let maximaPontuacao = Number(localStorage.getItem("pontuacao"));
+    
+    if (maximaPontuacao < this.pontos){
+      localStorage.setItem("pontuacao", pontuacao.pontos);
+      maximaPontuacao = this.pontos;
+    }
+    
+    contexto.strokeText(maximaPontuacao, 234, 182);
   }
 }
 
@@ -230,7 +238,7 @@ const canos = {
     const peDoFlappy = flappyBird.y + flappyBird.altura;
     const barrigaFlappy = flappyBird.x + flappyBird.largura;
 
-    if(barrigaFlappy >= par.x+5){
+    if((barrigaFlappy >= par.x+5) && (flappyBird.x <= par.x+canos.largura)){
       if (cabecaDoFlappy <= par.canoCeu.y){
         return true;
       }
@@ -273,9 +281,9 @@ const flappyBird = {
   altura: 24,
   x: 10,
   y: 50,
-  gravidade: 0.1,
+  gravidade: 0.15,
   velocidade: 0,
-  pulo: 2,
+  pulo: 2.5,
   frameAtual: 0,
   movimentos: [
     { spriteX: 0, spriteY: 0, },
@@ -403,7 +411,6 @@ const Telas = {
       canos.atualiza();
       chao.atualiza();
       pontuacao.atualiza();
-      console.log(pontuacao.pontos);
     },
 
     click() {
